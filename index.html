@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#c60b1e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<title>Espanhol</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:#fff8e7;color:#222;text-align:center}
+header{background:#c60b1e;color:#ffc400;padding:8px;font-weight:bold}
+main{max-width:520px;margin:auto;padding:16px}
+button{font-size:1.1rem;padding:14px;margin:6px 0;width:100%;border:2px solid #c60b1e;border-radius:12px;background:#fff;cursor:pointer}
+button:disabled{opacity:.9}
+.ok{background:#2ecc40!important;color:#fff;border-color:#2ecc40}
+.bad{background:#ff4136!important;color:#fff;border-color:#ff4136}
+.emoji{font-size:5rem;line-height:1.1}
+.word{font-size:2.2rem;font-weight:bold;color:#c60b1e;margin:6px 0}
+.ph{background:#fff;border-radius:10px;padding:10px;margin:8px 0;font-style:italic}
+.txt{background:#fff;border-radius:10px;padding:14px;text-align:left;line-height:1.5}
+mark{background:#ffc400;padding:0 4px;border-radius:4px;font-weight:bold}
+small{color:#777}
+a{color:#c60b1e}
+#info{min-height:2.4em;margin:6px 0}
+#light{width:46px;height:46px;border-radius:50%;margin:10px auto;background:#ccc;transition:.3s}
+#light.g{background:#2ecc40;box-shadow:0 0 30px 12px #2ecc40}
+#light.r{background:#ff4136;box-shadow:0 0 30px 12px #ff4136}
+#next{display:none;font-size:2rem;background:#c60b1e;color:#fff}
+</style>
+</head>
+<body>
+<header>Feito com Claude</header>
+<main id="app"></main>
+<script>
+/* ===== BANCO LOCAL =====
+ palavras: palavra|tradução|erradaA,erradaB|emoji|frase1|frase2
+ textos:   país|tradução|erradaA,erradaB|emoji|texto com *palavra* destacada */
+const S=s=>s.trim().split("\n");
+const RAW={
+ini:{w:S(`
+perro|cachorro|gato,cavalo|🐶|El perro duerme en el sofá.|Mi vecino pasea al perro por la mañana.
+ventana|janela|porta,parede|🪟|Abre la ventana, hace calor.|Veo la lluvia por la ventana.
+cuchara|colher|garfo,faca|🥄|Uso una cuchara para la sopa.|El bebé come con una cuchara pequeña.
+zapato|sapato|meia,chapéu|👞|Perdí un zapato en la playa.|Estos zapatos son muy cómodos.
+queso|queijo|manteiga,presunto|🧀|Quiero pan con queso.|Este queso viene de Argentina.
+llave|chave|porta,janela|🔑|No encuentro la llave de casa.|Cierra la puerta con llave.
+manzana|maçã|banana,laranja|🍎|Como una manzana cada día.|La manzana está madura.
+leche|leite|suco,água|🥛|Bebo leche con café.|La leche está fría.
+pan|pão|bolo,biscoito|🍞|Compro pan en la panadería.|Quiero pan con mantequilla.
+calle|rua|praça,ponte|🛣️|Vivo en esta calle.|La calle está llena de gente.
+pájaro|pássaro|peixe,inseto|🐦|Un pájaro canta en el árbol.|El pájaro vuela muy alto.
+mano|mão|pé,braço|✋|Me lavo las manos antes de comer.|Dame la mano para cruzar.
+reloj|relógio|anel,pulseira|⌚|Mi reloj es nuevo.|¿Qué hora marca el reloj?
+paraguas|guarda-chuva|chapéu,capa|☂️|Llévate el paraguas, va a llover.|Perdí mi paraguas en el autobús.
+silla|cadeira|mesa,cama|🪑|Siéntate en la silla.|Falta una silla en la cocina.
+nube|nuvem|névoa,chuva|☁️|Hay una nube en el cielo.|Las nubes están grises hoy.
+pescado|peixe|frango,carne|🐟|Comemos pescado los viernes.|El pescado está fresco.
+mariposa|borboleta|abelha,formiga|🦋|Una mariposa se posó en la flor.|Me gustan las mariposas amarillas.
+hermano|irmão|primo,tio|👦|Mi hermano estudia medicina.|Tengo un hermano mayor.
+cumpleaños|aniversário|casamento,feriado|🎂|Hoy es mi cumpleaños.|Celebramos el cumpleaños de Ana.
+tienda|loja|escola,hospital|🏪|La tienda abre a las nueve.|Compré pan en la tienda de la esquina.
+cielo|céu|chão,mar|🌤️|El cielo está despejado.|Miro el cielo por la noche.
+`),t:S(`
+México|cedo|tarde,devagar|🌅|En la ciudad, muchas personas salen *temprano* para llegar a tiempo al trabajo.
+España|pessoas|governo,turistas|☀️|Hoy hace mucho calor en Madrid. La *gente* bebe agua y busca la sombra.
+España|celular|carro,relógio|📱|Los jóvenes usan el *móvil* para estudiar idiomas. Cinco minutos al día ayudan mucho.
+Colombia|chuva|lua,luz|🌧️|En Colombia hay mucha *lluvia* en octubre. Los paraguas se venden en todas las calles.
+Chile|frio|calor,vento|🥶|En el sur de Chile hace mucho *frío* en invierno y la gente usa abrigos gruesos.
+Perú|mercado|escola,museu|🧺|Cada domingo, mi familia va al *mercado* para comprar frutas y verduras frescas.
+Uruguay|praia|montanha,piscina|🏖️|En verano, miles de turistas visitan la *playa* de Punta del Este.
+Argentina|futebol|basquete,tênis|⚽|Los domingos, los vecinos se reúnen para ver el *fútbol* en la plaza.
+`)},
+int:{w:S(`
+aprovechar|aproveitar|aprovar,comprovar|✨|Hay que aprovechar el buen tiempo.|Aproveché el viaje para visitar a mi tía.
+tardar|demorar|chegar,cancelar|⏳|El autobús tarda veinte minutos.|No tardes en responder.
+enfadarse|zangar-se|cansar-se,enfeitar-se|😠|Se enfada cuando pierde.|No te enfades conmigo.
+estrenar|estrear|estranhar,estender|🎬|Voy a estrenar zapatos nuevos.|La película se estrena el viernes.
+soler|costumar|soltar,solucionar|🔁|Suelo desayunar café con leche.|Aquí suele llover en abril.
+rato|momento|roedor,ruído|🕐|Espera un rato, ya vengo.|Pasamos un buen rato juntos.
+fregar|lavar|fritar,fermentar|🧽|Friego los platos después de comer.|Hay que fregar el suelo.
+rellenar|preencher|relatar,relembrar|📝|Rellena este formulario, por favor.|Rellené el vaso de agua.
+rebajas|liquidação|reajuste,imposto|🏷️|Las rebajas empiezan en enero.|Compré un abrigo en rebajas.
+grifo|torneira|ralo,cano|🚰|Cierra el grifo, por favor.|El grifo gotea toda la noche.
+nevera|geladeira|forno,fogão|🧊|Pon la leche en la nevera.|La nevera está vacía.
+enchufe|tomada|fio,lâmpada|🔌|El enchufe no funciona.|Busco un enchufe para cargar el móvil.
+aparcar|estacionar|aparecer,apartar|🅿️|Es difícil aparcar en el centro.|Aparqué el coche frente a casa.
+olvidar|esquecer|lembrar,olhar|🤔|No olvides las llaves.|Olvidé su nombre.
+cartera|carteira|bolsa,mochila|👛|Perdí la cartera en el metro.|Guardo el carné en la cartera.
+`),t:S(`
+Chile|poupar|alugar,gastar|💰|Muchos jóvenes intentan *ahorrar* dinero ante el aumento de los precios.
+España|aluguel|imposto,compra|🏠|Los precios del *alquiler* han subido y muchos estudiantes comparten piso.
+México|blecaute|incêndio,aviso|💡|Un *apagón* dejó sin electricidad a miles de hogares durante la noche.
+Perú|colheita|costura,receita|🥔|Los agricultores peruanos celebran una buena *cosecha* de papa este año.
+España|engarrafamento|atalho,desvio|🚗|Un gran *atasco* bloqueó la entrada a Barcelona durante dos horas.
+Argentina|emprego|empréstimo,imposto|💼|La oferta de *empleo* para jóvenes crece en Buenos Aires.
+Colombia|vizinhos|visitantes,parentes|🏘️|Los *vecinos* organizaron una limpieza del parque del barrio.
+España|liquidação|reajuste,imposto|🛍️|Las *rebajas* de verano llenaron de gente las tiendas del centro.
+`)},
+av:{w:S(`
+empeño|empenho|enfeite,hesitação|💪|Puso mucho empeño en terminar el proyecto.|Su empeño por ganar nos sorprendió.
+desenlace|desfecho|desencontro,desleixo|📖|El desenlace de la novela fue inesperado.|Esperamos el desenlace del juicio.
+sobremesa|conversa à mesa após comer|toalha de mesa,prato principal|🍷|En España la sobremesa puede durar horas.|Charlamos en la sobremesa.
+madrugar|acordar cedo|dormir tarde,passar a noite acordado|⏰|Mañana tengo que madrugar.|Quien madruga, Dios le ayuda.
+rehén|refém|herdeiro,vizinho|🔒|Liberaron al rehén esta mañana.|La familia fue tomada como rehén.
+anhelar|almejar|anunciar,lamentar|💭|Anhela volver a su tierra.|Muchos jóvenes anhelan un empleo estable.
+sendero|trilha|sentença,sentimento|🥾|Seguimos el sendero hasta la cima.|El sendero estaba cubierto de hojas.
+acantilado|penhasco|acampamento,planalto|🏞️|La casa está junto a un acantilado.|Las olas golpean el acantilado.
+chisme|fofoca|piada,chiclete|🤫|No me gustan los chismes de oficina.|Me contó un chisme sobre el vecino.
+enterarse|ficar sabendo|entrar,enterrar-se|📰|Me enteré de la noticia ayer.|¿Te has enterado de lo que pasó?
+aguantar|suportar|agradar,aguçar|😣|No aguanto más este ruido.|Aguantó el dolor sin quejarse.
+desahogarse|desabafar|desabrigar-se,desanimar-se|😮‍💨|Necesito desahogarme con alguien.|Llorar le sirvió para desahogarse.
+rebosar|transbordar|rebocar,reabastecer|🌊|El río rebosó tras la tormenta.|La sala rebosaba de gente.
+mellizo|gêmeo|mimado,parente|👯|Mi hermano es mellizo.|Las hermanas mellizas no se parecen.
+`),t:S(`
+España|ascensão|queda,medo|🤖|El *auge* de la inteligencia artificial ha generado debate sobre el futuro del empleo.
+Argentina|pesquisa de opinião|sonho,som|📊|Según un *sondeo*, la mayoría de los ciudadanos apoya la medida.
+Colombia|greve|feira,fuga|✊|Los trabajadores convocaron una *huelga* para exigir mejores salarios.
+Uruguay|seca|inundação,colheita|🌵|La *sequía* afecta a los cultivos de toda la región.
+España|moradia|vivência,vizinhança|🏢|El precio de la *vivienda* sigue siendo el mayor obstáculo para los jóvenes.
+México|descoberta|ataque,salário|🔍|Un *hallazgo* arqueológico en Oaxaca revela una tumba de mil años.
+Chile|ondulação do mar|maré vazante,nevoeiro|🌊|Un fuerte *oleaje* obligó a cerrar varias playas de Valparaíso.
+Colombia|lacuna|pacote,projeto|📶|La *brecha* digital entre el campo y la ciudad sigue siendo enorme.
+Paraguay|escassez|excesso,desperdício|🚰|La *escasez* de agua preocupa a los productores del interior.
+`)}
+};
+const B={};
+for(const l in RAW){
+ B[l]={
+  w:RAW[l].w.map(s=>{const f=s.split("|");return{w:f[0],p:f[1],x:f[2].split(","),e:f[3],f:[f[4],f[5]]}}),
+  t:RAW[l].t.map(s=>{const f=s.split("|");return{c:f[0],p:f[1],x:f[2].split(","),e:f[3],t:f[4],w:f[4].match(/\*(.+?)\*/)[1]}})
+ };
+}
+const POOL=Object.values(B).flatMap(l=>[...l.w,...l.t]).map(i=>i.p);
+
+/* ===== UTIL ===== */
+const $=document.getElementById("app");
+const sh=a=>[...a].sort(()=>Math.random()-.5);
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const norm=s=>s.normalize("NFD").replace(/\p{M}/gu,"").toLowerCase();
+const store={
+ get:k=>{try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}},
+ set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+// sorteia item ainda não visto; quando acabam, reinicia o ciclo
+function draw(arr,key){
+ let s=store.get(key),n=arr.filter(x=>!s.includes(x.w));
+ if(!n.length){s=[];n=arr}
+ const it=n[Math.random()*n.length|0];
+ s.push(it.w);store.set(key,s);return it;
+}
+
+/* ===== TELA SEMPRE LIGADA ===== */
+let wl=null;
+async function lock(){try{wl=await navigator.wakeLock.request("screen")}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")lock()});
+document.addEventListener("click",()=>{if(!wl||wl.released)lock()});
+lock();
+
+/* ===== NOTÍCIAS AO VIVO ===== */
+const FEEDS=sh([
+ ["España","🇪🇸","https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"],
+ ["Argentina","🇦🇷","https://www.clarin.com/rss/lo-ultimo/"],
+ ["Chile","🇨🇱","https://www.latercera.com/arc/outboundfeeds/rss/?outputType=xml"],
+ ["México","🇲🇽","https://www.jornada.com.mx/rss/edicion.xml"],
+ ["Colombia","🇨🇴","https://www.eltiempo.com/rss/colombia.xml"],
+ ["Uruguay","🇺🇾","https://www.elpais.com.uy/rss/"],
+ ["América Latina (BBC Mundo)","🌎","https://feeds.bbci.co.uk/mundo/rss.xml"]
+]);
+let fi=0;const used=new Set();
+const STOP=new Set(["también","porque","cuando","durante","después","según","además","mientras","millones","gobierno","presidente","primera","primero","segundo","nuevo","nueva","nuevos","nuevas","tienen","puede","pueden","otros","otras"]);
+const getJ=(u,ms=5000)=>{const c=new AbortController();setTimeout(()=>c.abort(),ms);return fetch(u,{signal:c.signal}).then(r=>r.json())};
+const plain=h=>new DOMParser().parseFromString(h||"","text/html").body.textContent.replace(/\s+/g," ").trim();
+
+async function live(){
+ if(L==="ini"||!navigator.onLine)return null;
+ try{
+  const [c,fl,u]=FEEDS[fi++%FEEDS.length];
+  const j=await getJ("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u));
+  const items=sh(j.items||[]).filter(i=>!used.has(i.link)).slice(0,4);
+  const min=L==="int"?7:9,max=L==="int"?10:14;
+  for(const i of items){
+   const t=plain(i.title).replace(/[.!?:]*$/,".");
+   let d=plain(i.description).split(/(?<=[.!?])\s/)[0]||"";
+   let txt=(d&&d.length<190&&!d.startsWith(t.slice(0,20)))?t+" "+d:t;
+   if(txt.length<30||txt.length>300)continue;
+   const re=/(?<![A-Za-zÁÉÍÓÚÑáéíóúñü])[a-záéíóúñü]+(?![A-Za-zÁÉÍÓÚÑáéíóúñü])/g;
+   const ws=sh([...new Set(txt.match(re)||[])].filter(w=>w.length>=min&&w.length<=max&&!STOP.has(w)));
+   for(const w of ws.slice(0,3)){
+    const r=await getJ("https://api.mymemory.translated.net/get?q="+encodeURIComponent(w)+"&langpair=es|pt-BR");
+    const p=((r.responseData||{}).translatedText||"").toLowerCase().trim();
+    if(r.responseStatus!=200||!p||p.length>25||p.split(/\s+/).length>2||/[^\p{L}\s-]/u.test(p)||norm(p)===norm(w))continue;
+    used.add(i.link);
+    const html=esc(txt).replace(new RegExp("(?<![\\p{L}])"+w+"(?![\\p{L}])","u"),"*$&*");
+    return{live:1,c,fl,w,p,x:sh(POOL.filter(q=>norm(q)!==norm(p))).slice(0,2),e:fl+"📰",t:html,link:i.link};
+   }
+  }
+ }catch(e){}
+ return null;
+}
+
+/* ===== FLUXO ===== */
+let L,mode="w";
+function start(){
+ $.innerHTML=`<h2>Qual é o seu nível de espanhol?</h2>
+ <button onclick="pick('ini')">🌱 Iniciante</button>
+ <button onclick="pick('int')">🌿 Intermediário</button>
+ <button onclick="pick('av')">🌳 Avançado</button>`;
+}
+function pick(l){L=l;mode="w";show()}
+async function show(){
+ let it;
+ if(mode==="w")it=draw(B[L].w,"esp_"+L+"_w");
+ else{
+  $.innerHTML=`<div class="emoji">📰</div><p>Buscando notícia atual...</p>`;
+  it=await live()||draw(B[L].t,"esp_"+L+"_t");
+ }
+ render(it);
+}
+function render(it){
+ let html=`<div class="emoji">${it.e}</div>`;
+ if(mode==="w"){
+  html+=`<div class="word">${it.w}</div>`+it.f.map(f=>`<div class="ph">${f}</div>`).join("");
+ }else{
+  html+=`<small>${it.live?`Notícia atual · ${it.fl} ${it.c} · tradução automática`:`Estilo de imprensa: ${it.c}`}</small>
+  <div class="txt">${it.t.replace(/\*(.+?)\*/,"<mark>$1</mark>")}</div>`;
+ }
+ const opts=sh([it.p,...it.x]);
+ $.innerHTML=html+`<p>Qual a tradução de <b>${it.w}</b>?</p><div id="light"></div>
+ ${opts.map(o=>`<button class="o">${o}</button>`).join("")}
+ <div id="info"></div>
+ <button id="next" onclick="nextAct()">➡️</button>
+ <small><a href="#" onclick="start();return false">trocar nível</a></small>`;
+ document.querySelectorAll(".o").forEach(b=>b.onclick=()=>{
+  const right=b.textContent===it.p;
+  document.querySelectorAll(".o").forEach(x=>{x.disabled=true;if(x.textContent===it.p)x.classList.add("ok")});
+  if(!right)b.classList.add("bad");
+  document.getElementById("light").className=right?"g":"r";
+  document.getElementById("info").innerHTML=
+   (right?"✅ Correto!":`❌ A resposta correta é <b>${it.p}</b>`)+
+   `<br><small><a target="_blank" rel="noopener" href="https://dle.rae.es/${encodeURIComponent(it.w)}">Ver “${it.w}” no DLE</a>`+
+   (it.link?` · <a target="_blank" rel="noopener" href="${it.link}">Ler notícia</a>`:"")+`</small>`;
+  document.getElementById("next").style.display="block";
+ });
+}
+function nextAct(){mode=mode==="w"?"t":"w";show()}
+start();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>
