@@ -71,6 +71,15 @@ Chile|casaco|calça,luvas|🧥|En el sur de Chile hace frío y la gente usa un *
 Perú|cesta|mochila,caixa|🧺|Cada domingo, mi familia lleva una *canasta* al mercado para comprar frutas y verduras.
 Uruguay|praia|montanha,piscina|🏖️|En verano, miles de turistas visitan la *playa* de Punta del Este.
 Argentina|torcida|time,juiz|⚽|Los domingos, la *hinchada* llena la plaza para ver el partido.
+`),v:S(`
+soñar|con|de,en|💭|Sueño ___ una casa en la playa.|Sonho com uma casa na praia.
+pensar|en|con,a|🤔|Pienso ___ mis vacaciones todo el día.|Penso nas minhas férias o dia todo.
+ir|a|en,de|🚶|Mañana voy ___ la playa.|Amanhã vou à praia.
+empezar|a|de,en|▶️|Empiezo ___ estudiar a las ocho.|Começo a estudar às oito.
+acabar|de|a,con|✅|Acabo ___ llegar a casa.|Acabei de chegar em casa.
+casarse|con|a,en|💍|Mi hermana se casa ___ su novio en junio.|Minha irmã se casa com o noivo em junho.
+depender|de|en,con|⚖️|Todo depende ___ ti.|Tudo depende de você.
+enamorarse|de|por,con|❤️|Me enamoré ___ esta ciudad.|Me apaixonei por esta cidade.
 `)},
 int:{w:S(`
 tirar|jogar fora|puxar,guardar|🗑️|Tira la basura por la noche.|No tires papeles al suelo.
@@ -97,6 +106,15 @@ España|engarrafamento|atalho,desvio|🚗|Un gran *atasco* bloqueó la entrada a
 Argentina|emprego|empréstimo,imposto|💼|La oferta de *empleo* para jóvenes crece en Buenos Aires.
 Colombia|vizinhos|visitantes,parentes|🏘️|Los *vecinos* organizaron una limpieza del parque del barrio.
 España|liquidação|reajuste,imposto|🛍️|Las *rebajas* de verano llenaron de gente las tiendas del centro.
+`),v:S(`
+insistir|en|a,de|☝️|Insisto ___ pagar la cuenta.|Insisto em pagar a conta.
+tardar|en|a,de|⏳|Siempre tardo ___ llegar al trabajo.|Sempre demoro para chegar ao trabalho.
+dejar|de|a,en|🚭|Quiero dejar ___ fumar.|Quero parar de fumar.
+fijarse|en|de,a|👀|Fíjate ___ los detalles del contrato.|Repare nos detalhes do contrato.
+confiar|en|con,de|🤝|Confío ___ mi equipo.|Confio na minha equipe.
+aprender|a|de,para|📚|Mis hijos aprenden ___ nadar.|Meus filhos aprendem a nadar.
+quedar|en|a,de|📆|Quedamos ___ vernos a las seis.|Combinamos de nos ver às seis.
+acordarse|de|con,en|🧠|No me acuerdo ___ su nombre.|Não me lembro do nome dele.
 `)},
 av:{w:S(`
 huella|pegada|cicatriz,trilha|👣|Dejó su huella en la arena.|La huella digital es única.
@@ -123,13 +141,23 @@ México|descoberta|ataque,salário|🔍|Un *hallazgo* arqueológico en Oaxaca re
 Chile|ondulação do mar|maré vazante,nevoeiro|🌊|Un fuerte *oleaje* obligó a cerrar varias playas de Valparaíso.
 Colombia|lacuna|pacote,projeto|📶|La *brecha* digital entre el campo y la ciudad sigue siendo enorme.
 Paraguay|plantio|colheita,adubo|🌱|Los agricultores paraguayos comenzaron la *siembra* de soja.
+`),v:S(`
+consistir|en|de,con|📐|El plan consiste ___ reducir los costos.|O plano consiste em reduzir os custos.
+negarse|a|en,de|🙅|Se negó ___ firmar el documento.|Ele se recusou a assinar o documento.
+atreverse|a|de,en|😬|No me atrevo ___ decírselo.|Não ouso dizer isso a ele.
+darse cuenta|de|en,por|💡|Me di cuenta ___ mi error.|Percebi meu erro.
+renunciar|a|de,en|🚪|Renunció ___ su cargo ayer.|Renunciou ao cargo ontem.
+carecer|de|en,con|🕳️|La región carece ___ agua potable.|A região carece de água potável.
+tratarse|de|sobre,en|📖|Se trata ___ un problema serio.|Trata-se de um problema sério.
+contar|con|en,de|🙏|Cuento ___ tu ayuda.|Conto com a sua ajuda.
 `)}
 };
 const B={};
 for(const l in RAW){
  B[l]={
   w:RAW[l].w.map(s=>{const f=s.split("|");return{w:f[0],p:f[1],x:f[2].split(","),e:f[3],f:[f[4],f[5]]}}),
-  t:RAW[l].t.map(s=>{const f=s.split("|");return{c:f[0],p:f[1],x:f[2].split(","),e:f[3],t:f[4],w:f[4].match(/\*(.+?)\*/)[1]}})
+  t:RAW[l].t.map(s=>{const f=s.split("|");return{c:f[0],p:f[1],x:f[2].split(","),e:f[3],t:f[4],w:f[4].match(/\*(.+?)\*/)[1]}}),
+  v:RAW[l].v.map(s=>{const f=s.split("|");return{w:f[0],p:f[1],x:f[2].split(","),e:f[3],s:f[4],m:f[5]}})
  };
 }
 const POOL=Object.values(B).flatMap(l=>[...l.w,...l.t]).map(i=>i.p);
@@ -214,6 +242,7 @@ function pick(l){L=l;mode="w";show()}
 async function show(){
  let it;
  if(mode==="w")it=draw(B[L].w,"esp_"+L+"_w");
+ else if(mode==="v")it=draw(B[L].v,"esp_"+L+"_v");
  else{
   $.innerHTML=`<div class="emoji">📰</div><p>Buscando notícia atual...</p>`;
   it=await live()||draw(B[L].t,"esp_"+L+"_t");
@@ -222,14 +251,16 @@ async function show(){
 }
 function render(it){
  let html=`<div class="emoji">${it.e}</div>`;
- if(mode==="w"){
+ if(mode==="v"){
+  html+=`<small>Verbo e regência</small><div class="word">${it.w}</div><div class="ph">${it.s.replace("___","<mark>___</mark>")}</div>`;
+ }else if(mode==="w"){
   html+=`<div class="word">${it.w}</div>`+it.f.map(f=>`<div class="ph">${f}</div>`).join("");
  }else{
   html+=`<small>${it.live?`Notícia atual · ${it.fl} ${it.c} · tradução automática`:`Estilo de imprensa: ${it.c}`}</small>
   <div class="txt">${it.t.replace(/\*(.+?)\*/,"<mark>$1</mark>")}</div>`;
  }
  const opts=sh([it.p,...it.x]);
- $.innerHTML=html+`<p>Qual a tradução de <b>${it.w}</b>?</p><div id="light"></div>
+ $.innerHTML=html+`<p>${mode==="v"?`Qual preposição rege <b>${it.w}</b>?`:`Qual a tradução de <b>${it.w}</b>?`}</p><div id="light"></div>
  ${opts.map(o=>`<button class="o">${o}</button>`).join("")}
  <div id="info"></div>
  <button id="next" onclick="nextAct()">➡️</button>
@@ -241,12 +272,13 @@ function render(it){
   document.getElementById("light").className=right?"g":"r";
   document.getElementById("info").innerHTML=
    (right?"✅ Correto!":`❌ A resposta correta é <b>${it.p}</b>`)+
+   (mode==="v"?`<br><i>${it.s.replace("___","<b>"+it.p+"</b>")}</i><br><small>${it.m}</small>`:"")+
    `<br><small><a target="_blank" rel="noopener" href="https://dle.rae.es/${encodeURIComponent(it.w)}">Ver “${it.w}” no DLE</a>`+
    (it.link?` · <a target="_blank" rel="noopener" href="${it.link}">Ler notícia</a>`:"")+`</small>`;
   document.getElementById("next").style.display="block";
  });
 }
-function nextAct(){mode=mode==="w"?"t":"w";show()}
+function nextAct(){const O=["w","t","v"];mode=O[(O.indexOf(mode)+1)%3];show()}
 start();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
 </script>
