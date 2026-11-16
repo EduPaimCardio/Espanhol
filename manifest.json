@@ -1,0 +1,12 @@
+{
+  "name": "Espanhol – Vocabulário",
+  "short_name": "Espanhol",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8e7",
+  "theme_color": "#c60b1e",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
