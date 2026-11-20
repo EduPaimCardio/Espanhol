@@ -1,12 +1,6 @@
-const C="espanhol-v2",F=["./","index.html","manifest.json","icon.svg"];
-self.addEventListener("install",e=>{
-  self.skipWaiting();
-  e.waitUntil(caches.open(C).then(c=>c.addAll(F)));
-});
-self.addEventListener("activate",e=>{
-  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));
-});
-self.addEventListener("fetch",e=>{
-  if(new URL(e.request.url).origin!==location.origin)return;
-  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
-});
+const C = "espanhol-v1";
+const F = ["./", "index.html", "manifest.json"];
+self.addEventListener("install", e => e.waitUntil(caches.open(C).then(c => c.addAll(F))));
+self.addEventListener("fetch", e =>
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)))
+);
