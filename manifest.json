@@ -1,12 +1,13 @@
 {
-  "name": "Espanhol – Vocabulário",
+  "name": "Vocabulário Espanhol/Inglês",
   "short_name": "Espanhol",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/espanhol/",
+  "scope": "/espanhol/",
   "display": "standalone",
-  "background_color": "#fff8e7",
-  "theme_color": "#c60b1e",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
