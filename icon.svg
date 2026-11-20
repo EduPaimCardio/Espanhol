@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="90" fill="#c60b1e"/><rect y="128" width="512" height="256" fill="#ffc400"/><text x="256" y="320" font-size="200" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="#c60b1e">ES</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#1e3a8a"/>
+  <path d="M130 140h252a30 30 0 0 1 30 30v130a30 30 0 0 1-30 30H250l-70 56v-56h-50a30 30 0 0 1-30-30V170a30 30 0 0 1 30-30z" fill="#ffffff"/>
+  <text x="256" y="265" font-family="Arial, sans-serif" font-size="110" font-weight="700" text-anchor="middle" fill="#1e3a8a">ES·EN</text>
+  <rect x="190" y="290" width="132" height="10" rx="5" fill="#fde047"/>
+</svg>
